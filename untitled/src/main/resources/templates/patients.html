@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="template1"
+>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,48 +13,57 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.css}">
 </head>
 <body>
-<div class="container mt-4">
-    <h2 class="mb-3">List Patients</h2>
-    <form th:action="@{index}" method="get">
-        <label >Keyword:</label>
-        <input type="text" name="keyword" th:value="${keyword}">
-        <button type="submit" class="btn btn-info">
-            <i class="bi bi-search"></i>
-        </button>
-    </form>
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Date</th>
-            <th>Malade</th>
-            <th>Score</th>
-            <th>Deletion</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${patientList}">
-            <td th:text="${p.id}"></td>
-            <td th:text="${p.nom}"></td>
-            <td th:text="${p.dateNaissance}"></td>
-            <td th:text="${p.malade}"></td>
-            <td th:text="${p.score}"></td>
-            <td>
-                <a th:href="@{delete(id=${p.id},keyword=${keyword},page=${currentPage})}" class="btn btn-danger">
-                    <i class="bi bi-trash"></i>
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <ul class = "nav nav-pills">
-        <li th:each="page,status:${pages}">
-            <a th:href="@{/index(page=${status.index},keyword=${keyword})}"
-               th:class="${currentPage==status.index?'btn btn-info ms-1':'btn btn-outline-info ms-1'}"
-               th:text="${status.index}"></a>
-        </li>
-    </ul>
+
+<div layout:fragment="content1">
+    <div class="container mt-4">
+        <h2 class="mb-3">List Patients</h2>
+        <form th:action="@{index}" method="get">
+            <label >Keyword:</label>
+            <input type="text" name="keyword" th:value="${keyword}">
+            <button type="submit" class="btn btn-info">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Date</th>
+                <th>Malade</th>
+                <th>Score</th>
+                <th>Delete</th>
+                <th>Edit</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${patientList}">
+                <td th:text="${p.id}"></td>
+                <td th:text="${p.nom}"></td>
+                <td th:text="${p.dateNaissance}"></td>
+                <td th:text="${p.malade}"></td>
+                <td th:text="${p.score}"></td>
+                <td>
+                    <a th:href="@{delete(id=${p.id},keyword=${keyword},page=${currentPage})}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+                <td>
+                    <a th:href="@{editPatient(id=${p.id},keyword=${keyword},page=${currentPage})}" class="btn btn-success">
+                        <i class="bi bi-pen"></i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <ul class = "nav nav-pills">
+            <li th:each="page,status:${pages}">
+                <a th:href="@{/index(page=${status.index},keyword=${keyword})}"
+                   th:class="${currentPage==status.index?'btn btn-info ms-1':'btn btn-outline-info ms-1'}"
+                   th:text="${status.index}"></a>
+            </li>
+        </ul>
+    </div>
 </div>
 
 <!-- Bootstrap Bundle JS from WebJar -->

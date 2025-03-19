@@ -1,21 +1,35 @@
 # Hospital Management Application
 
-This Java EE web application is built using Spring Boot, Spring MVC, Thymeleaf, and Spring Data JPA. It allows you to manage patients by displaying, paginating, searching, and deleting patient records. Below you will find technical details of the important code parts and what they mean.
+This Java EE web application is built using Spring Boot, Spring MVC, Thymeleaf, and Spring Data JPA. It allows you to manage patients by displaying, paginating, searching, and deleting patient records (Part 1). In addition, the project has been extended (Part 2) to include a common template page for consistent layout and form validation to ensure that patient input data meets business rules.
+
+---
 
 ## Technologies Used
+
 - **Java 21**
 - **Spring Boot 3.2.4**
 - **Spring MVC** for handling HTTP requests and building the web layer.
 - **Spring Data JPA** for ORM and data persistence.
 - **Thymeleaf** for server-side HTML templating.
+- **Thymeleaf Layout Dialect** (or similar) for creating template pages with reusable fragments.
+- **Spring Boot Starter Validation** (Hibernate Validator) for validating form data.
 - **Bootstrap (via WebJars)** for responsive UI design.
-- **MySQL Connector/J** for connecting to a MySQL database (using XAMPP).
-- **Lombok** to reduce boilerplate code (getters, setters, etc.).
+- **MySQL Connector/J** for connecting to a MySQL database.
+- **Lombok** to reduce boilerplate code.
 - **Spring Boot DevTools** for live reload during development.
+
+---
 
 ## Project Structure & Key Code Excerpts
 
-### 1. Main Application Class
+### Part 1: Patient Management
+
+This section of the application manages patient records. It provides the following functionalities:
+- Displaying a list of patients with pagination.
+- Searching patients by name.
+- Deleting a patient.
+
+#### 1. Main Application Class
 
 **File:** `HopitalApplication.java`
 
@@ -33,18 +47,13 @@ public class HopitalApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // Seeding the database with sample patient data on startup.
         patientRepository.save(new Patient(null, "Youness", new Date(), false, 123));
-        patientRepository.save(new Patient(null, "said", new Date(), false, 1283));
-        patientRepository.save(new Patient(null, "hafsa", new Date(), true, 1230));
+        patientRepository.save(new Patient(null, "Said", new Date(), false, 1283));
+        patientRepository.save(new Patient(null, "Hafsa", new Date(), true, 1230));
     }
 }
 ```
 
-**Explanation:**
-- `@SpringBootApplication`: This annotation sets up component scanning, auto-configuration, and property support.
-- `implements CommandLineRunner`: The `run()` method executes after the application starts, allowing initial data seeding.
-- `patientRepository.save(...)`: Inserts sample records into the database.
-
-### 2. JPA Entity
+#### 2. JPA Entity
 
 **File:** `Patient.java`
 
@@ -66,12 +75,7 @@ public class Patient {
 }
 ```
 
-**Explanation:**
-- `@Entity`: Marks this class as a JPA entity.
-- `@Id` and `@GeneratedValue`: Designate the primary key and its auto-generation strategy.
-- Lombok annotations (`@Data`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder`): Automatically generate getters, setters, constructors, and a builder pattern to reduce boilerplate code.
-
-### 3. Repository Interface
+#### 3. Repository Interface
 
 **File:** `PatientRepository.java`
 
@@ -84,12 +88,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 }
 ```
 
-**Explanation:**
-- `extends JpaRepository<Patient, Long>`: Provides CRUD operations and pagination support for the Patient entity.
-- `findByNomContains`: Method that Spring Data JPA automatically implements to filter patients by a keyword.
-- Custom `@Query`: Demonstrates how to write custom JPQL queries with pagination.
-
-### 4. Controller
+#### 4. Controller
 
 **File:** `PatientController.java`
 
@@ -120,14 +119,7 @@ public class PatientController {
 }
 ```
 
-**Explanation:**
-- `@Controller`: Indicates that this class handles web requests.
-- `@GetMapping("/index")`: Maps HTTP GET requests for the patient listing.  
-  - Uses pagination and keyword search to filter patients.
-  - Passes model attributes to the Thymeleaf view (`patients.html`).
-- `@GetMapping("/delete")`: Handles deletion of a patient and redirects to the updated list.
-
-### 5. Thymeleaf Template
+#### 5. Thymeleaf Template for Patient Listing
 
 **File:** `patients.html`
 
@@ -192,17 +184,7 @@ public class PatientController {
 </html>
 ```
 
-**Explanation:**
-- **Bootstrap Integration:**  
-  The `<link>` and `<script>` tags use Thymeleaf's resource syntax to load Bootstrap and Bootstrap Icons from WebJars.
-- **Dynamic Content:**  
-  Thymeleaf expressions (e.g., `th:text`, `th:each`, and `th:href`) dynamically inject patient data, manage pagination, and handle actions like deletion.
-- **Responsive Design:**  
-  The Bootstrap classes (e.g., `container`, `table`, `btn`, etc.) ensure that the UI is responsive and visually appealing.
-
-### 6. Configuration & Dependencies
-
-**File:** `pom.xml`
+#### 6. Maven Dependencies (pom.xml)
 
 ```xml
 <!-- Excerpt from pom.xml -->
@@ -262,17 +244,51 @@ public class PatientController {
 </dependencies>
 ```
 
-**Explanation:**
-- **Spring Boot Starters:**  
-  These bring in the necessary dependencies for data access, web services, and templating.
-- **Database Connectors:**  
-  Include both H2 (for testing) and MySQL (for production with XAMPP).
-- **WebJars:**  
-  Package client-side libraries like Bootstrap and Bootstrap Icons as JAR files, which are automatically served as static resources.
-- **Lombok:**  
-  Reduces boilerplate code in entity and other classes.
-- **DevTools:**  
-  Improves the development experience with live reloading.
+---
+
+### Part 2: Template Page & Form Validation
+
+In this part, additional features have been added:
+
+- **Template Page (Page Template):**  
+  To avoid duplicating common layout elements (like headers, navigation bars, and footers) across multiple views, a global template page has been created. This template uses Thymeleaf's layout features (for example, by employing the [Thymeleaf Layout Dialect](https://github.com/ultraq/thymeleaf-layout-dialect)) so that each specific view (e.g., patient form, confirmation pages) can extend the common layout. This results in a consistent look and feel for the entire application and reduces code redundancy.
+
+- **Form Validation:**  
+  Form validation has been integrated into the patient entry process. By adding the Spring Boot Starter Validation dependency, you can now annotate the fields in your entity (or DTO) with validation constraints. For example, you might require that the patient's name has a minimum and maximum length or that a numerical score is within an acceptable range.
+
+#### 1. Adding Validation Annotations to the Entity
+
+Key validation annotations include:
+- `@NotBlank`: Ensures a field is not empty
+- `@Size`: Validates string length
+- `@Min`/`@Max`: Validates numerical ranges
+- `@DateTimeFormat`: Formats date input
+
+Add the validation dependency to your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
+
+#### 2. Controller Changes for Form Handling
+
+The controller needs to handle form submissions with validation:
+- Use `@Valid` annotation to trigger validation
+- Include `BindingResult` parameter to check for errors
+- Return to form page if validation fails
+
+#### 3. Global Template Structure
+
+The global template typically includes:
+- Common header with navigation
+- Content placeholder for page-specific content
+- Common footer
+- Shared CSS and JavaScript resources
+
+---
 
 ## Setup and Running the Application
 
@@ -283,8 +299,8 @@ public class PatientController {
    ```
 
 2. **Configure Database:**
-   - Make sure XAMPP is running and MySQL is active.
-   - The `application.properties` file is configured to connect to a MySQL database (`hopital-db`) on `localhost:3306`.
+    - Ensure that XAMPP is running and MySQL is active.
+    - The `application.properties` file is configured to connect to a MySQL database (`hopital-db`) on `localhost:3306`.
 
 3. **Build and Run:**
    ```bash
@@ -293,4 +309,4 @@ public class PatientController {
    ```
 
 4. **Access the Application:**
-   Navigate to [http://localhost:8084/index](http://localhost:8084/index) in your browser.
+    - Visit [http://localhost:8084/index](http://localhost:8084/index) for the patient list.
